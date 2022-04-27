@@ -18,10 +18,12 @@ import {
   useColorScheme,
   View,
   Image,
+  TouchableOpacity,
   ImageBackground
 } from 'react-native';
 
 import CardStack, { Card } from 'react-native-card-stack-swiper';
+import { Col, Row, Grid } from "react-native-easy-grid";
 
 import {
   Colors,
@@ -42,19 +44,52 @@ const StockPriceDifference: () => Node = ({stock}) => {
   }
 }
 
+const StockDetails: () => Node = ({stock}) => {
+  const headers = {
+    regularMarketPrice: 'Market Price',
+    regularMarketDayHigh: 'Day High',
+    regularMarketDayLow: 'Day Low',
+    fiftyDayAverage: '50 Day Avg',
+    fiftyDayAverageChange: '50 Day Avg Change',
+    twoHundredDayAverage: '200 Day Avg',
+    twoHundredDayAverageChange: '200 Day Avg Change',
+  }
+  return (
+    <View style={styles.cardDetails}>
+      <Grid>
+        {Object.keys(headers).map((key) => 
+          <Row>
+            <Col><Text style={styles.cardDetailsTitle}>{headers[key]}</Text></Col>
+            <Col><Text style={styles.cardDetailsData}>{stock[key].toFixed(2)}</Text></Col>
+          </Row>
+        )}
+      </Grid>
+    </View>
+  )
+}
+
 const StockCard: () => Node = ({stock}) => {
   const colorScheme = useColorScheme();
 
   return (
     <ImageBackground style={styles.cardLogo} source={{uri: stock.logo}}>
         <Card style={[styles.card]}>
-              <View style={[{height: 350}]}>
-                <StockPriceDifference stock={stock} />
-              </View>
+          <Grid>
+            <Row>
+              
               <View style={styles.cardText}>
                 <Text style={styles.cardSymbol}>{stock.symbol}</Text>
                 <Text style={styles.cardCompanyName}>{stock.shortName}</Text>
               </View>
+            </Row>
+            <Row>
+              
+              <View style={[{height: 350}]}>
+                <StockPriceDifference stock={stock} />
+                <StockDetails stock={stock} />
+              </View>
+            </Row>
+          </Grid>
         </Card>
       </ImageBackground>
   );
@@ -69,19 +104,40 @@ const App: () => Node = () => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  const swiper = React.useRef(null);
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <CardStack
         loop
         style={styles.content}
+        ref={swiper}
         renderNoMoreCards={() => <Text style={{ fontWeight: '700', fontSize: 18, color: 'gray' }}>No more cards :(</Text>}
         onSwiped={() => console.log('onSwiped')}
         onSwipedLeft={() => console.log('onSwipedLeft')}
       >
         {stocks.map(stock => <StockCard key={stock.symbol} stock={stock} />)}
       </CardStack>
-
+      <View style={styles.footer}>
+        <View style={styles.buttonContainer}>
+            <TouchableOpacity style={[styles.button, styles.red]} onPress={() => {
+                swiper.current.swipeLeft();
+              }}>
+                <Text style={{fontSize: 30}}>👎</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.button, styles.orange]} onPress={() => {
+                swiper.current.goBackFromLeft();
+              }}>
+                <Text style={{top: -3, color: 'black', fontSize: 30, fontWeight: '800'}}>↺</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.button, styles.green]} onPress={() => {
+                swiper.current.swipeRight();
+              }}>
+                <Text style={{fontSize: 30}}>👍</Text>
+              </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };
@@ -114,6 +170,19 @@ const styles = StyleSheet.create({
     },
     shadowOpacity:1,
   },
+  cardDetails: {
+    width: 320,
+    height: 180,
+    padding: 10,
+  },
+  cardDetailsTitle: {
+      fontWeight: '700',
+      color: '#fff',
+  },
+  cardDetailsData: {
+    color: '#eee',
+    textAlign: 'right'
+  },
   cardLogo: {
     width: 320,
     height: 470,
@@ -145,10 +214,9 @@ const styles = StyleSheet.create({
   },
   cardPrice: {
     opacity: 1,
-    paddingLeft: 20,
-    lineHeight: 70,
-    textAlign: 'left',
-    fontSize: 30,
+    padding: 10,
+    textAlign: 'right',
+    fontSize: 24,
     fontFamily: 'System',
     backgroundColor: 'transparent',
   },
