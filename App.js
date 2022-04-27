@@ -18,6 +18,8 @@ import {
   View,
 } from 'react-native';
 
+import CardStack, { Card } from 'react-native-card-stack-swiper';
+
 import {
   Colors,
   DebugInstructions,
@@ -26,31 +28,6 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
 
 const App: () => Node = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -60,53 +37,108 @@ const App: () => Node = () => {
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <CardStack
+        style={styles.content}
+        renderNoMoreCards={() => <Text style={{ fontWeight: '700', fontSize: 18, color: 'gray' }}>No more cards :(</Text>}
+        onSwiped={() => console.log('onSwiped')}
+        onSwipedLeft={() => console.log('onSwipedLeft')}
+      >
+        <Card style={[styles.card, styles.card1]}><Text style={styles.label}>A</Text></Card>
+        <Card style={[styles.card, styles.card2]} onSwipedLeft={() => alert('onSwipedLeft')}><Text style={styles.label}>B</Text></Card>
+        <Card style={[styles.card, styles.card1]}><Text style={styles.label}>C</Text></Card>
+        <Card style={[styles.card, styles.card2]}><Text style={styles.label}>D</Text></Card>
+        <Card style={[styles.card, styles.card1]}><Text style={styles.label}>E</Text></Card>
+      </CardStack>
+
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+    backgroundColor: '#f2f2f2',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  content:{
+    flex: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  card:{
+    width: 320,
+    height: 470,
+    backgroundColor: '#FE474C',
+    borderRadius: 5,
+    shadowColor: 'rgba(0,0,0,0.5)',
+    shadowOffset: {
+      width: 0,
+      height: 1
+    },
+    shadowOpacity:0.5,
   },
-  highlight: {
-    fontWeight: '700',
+  card1: {
+    backgroundColor: '#FE474C',
   },
+  card2: {
+    backgroundColor: '#FEB12C',
+  },
+  label: {
+    lineHeight: 400,
+    textAlign: 'center',
+    fontSize: 55,
+    fontFamily: 'System',
+    color: '#ffffff',
+    backgroundColor: 'transparent',
+  },
+  footer:{
+    flex:1,
+    justifyContent:'center',
+    alignItems:'center'
+  },
+  buttonContainer:{
+    width:220,
+    flexDirection:'row',
+    justifyContent: 'space-between',
+  },
+  button:{
+    shadowColor: 'rgba(0,0,0,0.3)',
+    shadowOffset: {
+      width: 0,
+      height: 1
+    },
+    shadowOpacity:0.5,
+    backgroundColor:'#fff',
+    alignItems:'center',
+    justifyContent:'center',
+    zIndex: 0,
+  },
+  orange:{
+    width:55,
+    height:55,
+    borderWidth:6,
+    borderColor:'rgb(246,190,66)',
+    borderRadius:55,
+    marginTop:-15
+  },
+  green:{
+    width:75,
+    height:75,
+    backgroundColor:'#fff',
+    borderRadius:75,
+    borderWidth:6,
+    borderColor:'#01df8a',
+  },
+  red:{
+    width:75,
+    height:75,
+    backgroundColor:'#fff',
+    borderRadius:75,
+    borderWidth:6,
+    borderColor:'#fd267d',
+  }
 });
 
 export default App;
