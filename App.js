@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import type {Node} from 'react';
 import LoginScreen, { SocialButton } from "react-native-login-screen";
 import axios from 'axios'
+import { stocks } from './mockData';
 
 const network = axios.create({
   baseURL: 'http://10.0.2.2:8080',
@@ -39,7 +40,7 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-const StockPriceDifference: () => Node = ({stock}) => {
+const StockPriceDifference = ({stock}) => {
   let  { regularMarketChange, regularMarketChangePercent} = stock;
   
   if (regularMarketChange > 0) {
@@ -50,7 +51,7 @@ const StockPriceDifference: () => Node = ({stock}) => {
   }
 }
 
-const StockDetails: () => Node = ({stock}) => {
+const StockDetails = ({stock}) => {
   const headers = {
     regularMarketPrice: 'Market Price',
     regularMarketDayHigh: 'Day High',
@@ -74,11 +75,11 @@ const StockDetails: () => Node = ({stock}) => {
   )
 }
 
-const StockCard: () => Node = ({stock}) => {
+const StockCard = ({stock}) => {
   const colorScheme = useColorScheme();
 
   return (
-    <ImageBackground style={styles.cardLogo} source={{uri: stock.logo}}>
+    <ImageBackground style={styles.cardLogo} source={{uri: stock.logo.toString()}}>
         <Card style={[styles.card]}>
           <Grid>
             <Row>
@@ -102,7 +103,7 @@ const StockCard: () => Node = ({stock}) => {
 
 }
 
-const LoginView: () => Node = (props) => {
+const LoginView = (props) => {
 
   // const [username, setUsername ] = useState('');
   // const [password, setPassword] = useState('');
@@ -140,7 +141,7 @@ const getStocks = async (setStocks) => {
 }
 
 
-const App: () => Node = () => {
+const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
@@ -148,7 +149,6 @@ const App: () => Node = () => {
   };
 
   const [userData, setUserData ] = useState(null);
-  const [stocks, setStocks ] = useState(null);
 
 
   const swiper = React.useRef(null);
@@ -159,19 +159,25 @@ const App: () => Node = () => {
     return <LoginView onLogin = {(user) => setUserData(user)} />;
 
 
-  if (stocks == null) {
-    (async () => {
-      let res = await network.get('/api/v1/stock');
-      setStocks(res.data);
-    })();
-    return <Text>Login Successful. Loading...</Text>
-  }
-
-
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      <View style={{flex:1}}>
+        <Grid>
+          <Col>
+            <Text>Hello, {userData.name}</Text>
+            <Text>Budget: ${userData.budget}</Text>
+          </Col>
+          <Col>
+          <TouchableOpacity style={[styles.button, styles.logout]} onPress={() => {
+                setUserData(null);
+              }}>
+                <Text style={{fontSize: 20}}></Text>
+              </TouchableOpacity>
+          </Col>
+        </Grid>
+      </View>
       <CardStack
         loop
         style={styles.content}
@@ -343,6 +349,14 @@ const styles = StyleSheet.create({
     width:75,
     height:75,
     backgroundColor:'#fff',
+    borderRadius:75,
+    borderWidth:6,
+    borderColor:'#fd267d',
+  },
+  logout:{
+    width:50,
+    height:50,
+    backgroundColor:'#fd267d',
     borderRadius:75,
     borderWidth:6,
     borderColor:'#fd267d',
