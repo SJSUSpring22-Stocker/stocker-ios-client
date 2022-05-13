@@ -11,7 +11,9 @@ import type {Node} from 'react';
 import LoginScreen, { SocialButton } from "react-native-login-screen";
 import axios from 'axios'
 
-axios.defaults.baseURL = process.env.STOCKER_URL || 'http://localhost:8080'
+const network = axios.create({
+  baseURL: 'http://10.0.2.2:8080',
+})
 
 import {
   SafeAreaView,
@@ -102,12 +104,15 @@ const StockCard: () => Node = ({stock}) => {
 
 const LoginView: () => Node = (props) => {
 
-  const [username, setUsername ] = useState('');
-  const [password, setPassword] = useState(''); 
+  // const [username, setUsername ] = useState('');
+  // const [password, setPassword] = useState('');
+
+  let username = '';
+  let pass = '';
 
   return <LoginScreen
     onLoginPress={async () => {
-        let res = await axios.post('/api/v1/auth', {user: username, password: password});
+        let res = await network.post('/api/v1/auth', {user: username, password: pass});
         if (res.status != 200) {
           // TODO: error condition
         }
@@ -116,13 +121,13 @@ const LoginView: () => Node = (props) => {
         }
     }}
     onHaveAccountPress={() => {}}
-    onEmailChange={(email) => {setUsername(email)}}
-    onPasswordChange={(password) => {setPassword(password)}}
+    onEmailChange={(email) => {username = email}}
+    onPasswordChange={(password) => {pass = password}}
   ></LoginScreen>
 }
 
 const getStocks = async (setStocks) => {
-    let res = await axios.get('/api/v1/stock');
+    let res = await network.get('/api/v1/stock');
     if (res.status != 200) {
       setStocks(false);
       setTimeout(() => {
@@ -145,6 +150,8 @@ const App: () => Node = () => {
   const [userData, setUserData ] = useState(null);
   const [stocks, setStocks ] = useState(null);
 
+
+  const swiper = React.useRef(null);
   
 
 
@@ -153,12 +160,14 @@ const App: () => Node = () => {
 
 
   if (stocks == null) {
-    getStocks((e) => setStocks(e))
+    (async () => {
+      let res = await network.get('/api/v1/stock');
+      setStocks(res.data);
+    })();
+    return <Text>Login Successful. Loading...</Text>
   }
 
 
-
-  const swiper = React.useRef(null);
 
   return (
     <View style={styles.container}>
