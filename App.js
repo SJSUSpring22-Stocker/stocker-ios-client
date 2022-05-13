@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import type {Node} from 'react';
 import { stocks } from './mockData';
 import {
@@ -32,6 +32,8 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+
+let userPicks = [];
 
 const StockPriceDifference: () => Node = ({stock}) => {
   let  { regularMarketChange, regularMarketChangePercent} = stock;
@@ -99,6 +101,8 @@ const StockCard: () => Node = ({stock}) => {
 
 const App: () => Node = () => {
   const isDarkMode = useColorScheme() === 'dark';
+  const [profile, setProfile] = useState(true);
+  const [index, setIndex] = useState(0);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -107,14 +111,22 @@ const App: () => Node = () => {
   const swiper = React.useRef(null);
 
   return (
+    profile ?
     <View style={styles.container}>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={[styles.button, styles.green]} onPress={() => {
+          setProfile(false);
+        }}>
+          <Text style={{top: -3, color: 'black', fontSize: 12, fontWeight: '800'}}>Portfolio</Text>
+        </TouchableOpacity>
+      </View>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <CardStack
         loop
         style={styles.content}
         ref={swiper}
         renderNoMoreCards={() => <Text style={{ fontWeight: '700', fontSize: 18, color: 'gray' }}>No more cards :(</Text>}
-        onSwiped={() => console.log('onSwiped')}
+        onSwiped={() => console.log('onSwiped') }
         onSwipedLeft={() => console.log('onSwipedLeft')}
       >
         {stocks.map(stock => <StockCard key={stock.symbol} stock={stock} />)}
@@ -123,18 +135,58 @@ const App: () => Node = () => {
         <View style={styles.buttonContainer}>
             <TouchableOpacity style={[styles.button, styles.red]} onPress={() => {
                 swiper.current.swipeLeft();
+                setIndex(index+1);
               }}>
                 <Text style={{fontSize: 30}}>👎</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.button, styles.orange]} onPress={() => {
                 swiper.current.goBackFromLeft();
+                setIndex(index-1);
               }}>
                 <Text style={{top: -3, color: 'black', fontSize: 30, fontWeight: '800'}}>↺</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.button, styles.green]} onPress={() => {
                 swiper.current.swipeRight();
+                userPicks.push(stocks[index]);
+                setIndex(index+1);
+                console.log(userPicks);
               }}>
                 <Text style={{fontSize: 30}}>👍</Text>
+              </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+    :
+    <View style={styles.container}>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={[styles.button, styles.green]} onPress={() => {
+          setProfile(true);
+        }}>
+          <Text style={{top: -3, color: 'black', fontSize: 12, fontWeight: '800'}}>Browse</Text>
+        </TouchableOpacity>
+      </View>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      <CardStack
+        loop
+        style={styles.content}
+        ref={swiper}
+        renderNoMoreCards={() => <Text style={{ fontWeight: '700', fontSize: 18, color: 'gray' }}>No more cards :(</Text>}
+        onSwiped={() => console.log('onSwiped') }
+        onSwipedLeft={() => console.log('onSwipedLeft')}
+      >
+        {userPicks.map((stock = stocks[0]) => <StockCard key={stock.symbol} stock={stock} />)}
+      </CardStack>
+      <View style={styles.footer}>
+        <View style={styles.buttonContainer}>
+            <TouchableOpacity style={[styles.button, styles.red]} onPress={() => {
+                swiper.current.goBackFromLeft();;
+              }}>
+                <Text style={{fontSize: 12}}>Previous</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.button, styles.green]} onPress={() => {
+                swiper.current.swipeRight();
+              }}>
+                <Text style={{fontSize: 12}}>Next</Text>
               </TouchableOpacity>
         </View>
       </View>
