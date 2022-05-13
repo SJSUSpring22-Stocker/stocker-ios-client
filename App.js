@@ -58,7 +58,7 @@ const StockDetails: () => Node = ({stock}) => {
     <View style={styles.cardDetails}>
       <Grid>
         {Object.keys(headers).map((key) => 
-          <Row>
+          <Row key={key}>
             <Col><Text style={styles.cardDetailsTitle}>{headers[key]}</Text></Col>
             <Col><Text style={styles.cardDetailsData}>{stock[key].toFixed(2)}</Text></Col>
           </Row>
