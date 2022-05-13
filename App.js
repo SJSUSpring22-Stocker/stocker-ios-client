@@ -7,7 +7,6 @@
  */
 
 import React, { useState } from 'react';
-import type {Node} from 'react';
 import LoginScreen, { SocialButton } from "react-native-login-screen";
 import axios from 'axios'
 import { stocks } from './mockData';
