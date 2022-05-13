@@ -6,9 +6,13 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type {Node} from 'react';
-import { stocks } from './mockData';
+import LoginScreen, { SocialButton } from "react-native-login-screen";
+import axios from 'axios'
+
+axios.defaults.baseURL = process.env.STOCKER_URL || 'http://localhost:8080'
+
 import {
   SafeAreaView,
   ScrollView,
@@ -96,6 +100,40 @@ const StockCard: () => Node = ({stock}) => {
 
 }
 
+const LoginView: () => Node = (props) => {
+
+  const [username, setUsername ] = useState('');
+  const [password, setPassword] = useState(''); 
+
+  return <LoginScreen
+    onLoginPress={async () => {
+        let res = await axios.post('/api/v1/auth', {user: username, password: password});
+        if (res.status != 200) {
+          // TODO: error condition
+        }
+        else {
+          props.onLogin(res.data)
+        }
+    }}
+    onHaveAccountPress={() => {}}
+    onEmailChange={(email) => {setUsername(email)}}
+    onPasswordChange={(password) => {setPassword(password)}}
+  ></LoginScreen>
+}
+
+const getStocks = async (setStocks) => {
+    let res = await axios.get('/api/v1/stock');
+    if (res.status != 200) {
+      setStocks(false);
+      setTimeout(() => {
+        setStocks(null);
+      }, 2000);
+    } 
+    else {
+      setStocks(res.data);
+    }
+}
+
 
 const App: () => Node = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -103,6 +141,22 @@ const App: () => Node = () => {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  const [userData, setUserData ] = useState(null);
+  const [stocks, setStocks ] = useState(null);
+
+  
+
+
+  if (userData == null)
+    return <LoginView onLogin = {(user) => setUserData(user)} />;
+
+
+  if (stocks == null) {
+    getStocks((e) => setStocks(e))
+  }
+
+
 
   const swiper = React.useRef(null);
 
