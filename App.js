@@ -149,31 +149,48 @@ const App = () => {
   };
 
   const [userData, setUserData ] = useState(null);
-
-
   const swiper = React.useRef(null);
+
+
+  const onSwiped = async (index, liked) => {
+    let stock = stocks[index];
+
+    if (liked) {
+      // decrease user budget
+      setUserData({...userData, budget: userData.budget - stock.regularMarketPrice})
+    }
+    try {
+      let res = await network.post('/api/v1/selection', {
+        user: userData.id,
+        Stock: stock.symbol,
+        Price: stock.regularMarketPrice,
+        Change: stock.regularMarketChange,
+        liked: liked
+      })
+    }
+    catch (err) {
+      console.error(err.response)
+    }
+  }
   
-
-
   if (userData == null)
     return <LoginView onLogin = {(user) => setUserData(user)} />;
-
 
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <View style={{flex:1}}>
+      <View style={{ height: 50, flex:1,elevation: 10, shadowColor: '#222'}}>
         <Grid>
-          <Col>
-            <Text>Hello, {userData.name}</Text>
-            <Text>Budget: ${userData.budget}</Text>
+          <Col size ={50} style={{padding: 5}}>
+            <Text style={styles.headerName}>Hello, {userData.name}</Text>
+            <Text style={styles.headerBudget}>Budget: ${userData.budget.toFixed(2)}</Text>
           </Col>
-          <Col>
+          <Col size={35} style={{padding: 5}}>
           <TouchableOpacity style={[styles.button, styles.logout]} onPress={() => {
                 setUserData(null);
               }}>
-                <Text style={{fontSize: 20}}></Text>
+                <Text style={{fontSize: 20, color: 'white'}}>Logout</Text>
               </TouchableOpacity>
           </Col>
         </Grid>
@@ -183,8 +200,8 @@ const App = () => {
         style={styles.content}
         ref={swiper}
         renderNoMoreCards={() => <Text style={{ fontWeight: '700', fontSize: 18, color: 'gray' }}>No more cards :(</Text>}
-        onSwiped={() => console.log('onSwiped')}
-        onSwipedLeft={() => console.log('onSwipedLeft')}
+        onSwipedRight={(idx) => onSwiped(idx, true)}
+        onSwipedLeft={(idx) => onSwiped(idx, false)}
       >
         {stocks.map(stock => <StockCard key={stock.symbol} stock={stock} />)}
       </CardStack>
@@ -225,6 +242,14 @@ const styles = StyleSheet.create({
   logo: {
     width: 66,
     height: 58,
+  },
+  headerName: {
+    fontSize: 18,
+    color: '#222'
+  },
+  headerBudget: {
+    fontSize: 16,
+    color: '#222'
   },
   card:{
     width: 320,
@@ -354,7 +379,7 @@ const styles = StyleSheet.create({
     borderColor:'#fd267d',
   },
   logout:{
-    width:50,
+    width:150,
     height:50,
     backgroundColor:'#fd267d',
     borderRadius:75,
